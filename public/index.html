@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Form</title>
+    <script src="https://cdn.jsdelivr.net/npm/puppeteer@23.6.0/lib/cjs/puppeteer/puppeteer.min.js"></script>
+</head>
+<body>
+
+    <h1>Formulaire de validation OTP</h1>
+    <form id="otpForm">
+        <label for="formUrl">Form URL:</label>
+        <input type="text" id="formUrl" name="formUrl" required><br><br>
+
+        <label for="emailToSubmit">Email:</label>
+        <input type="email" id="emailToSubmit" name="emailToSubmit" required><br><br>
+
+        <button type="submit">Valider</button>
+    </form>
+
+    <!-- Section pour afficher le résultat -->
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('otpForm').addEventListener('submit', async function(event) {
+            event.preventDefault();  // Empêche le rechargement de la page
+            
+            const formUrl = document.getElementById('formUrl').value;
+            const emailToSubmit = document.getElementById('emailToSubmit').value;
+
+            // Créer un objet FormData avec les données du formulaire
+            const formData = new FormData();
+            formData.append('formUrl', formUrl);
+            formData.append('emailToSubmit', emailToSubmit);
+
+            // Envoi de la requête vers le serveur (Backend)
+            try {
+                const response = await fetch('/vf', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const textResponse = await response.text(); // Récupère la réponse sous forme de texte
+                console.log('Réponse brute du serveur:', textResponse); // Affichez la réponse brute
+
+                const result = JSON.parse(textResponse); // Parse le texte en JSON
+                document.getElementById('result').textContent = `Code OTP: ${result.otpCode || 'Aucun OTP trouvé'}`;
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('result').textContent = 'Erreur lors du traitement du formulaire.';
+            }
+        });
+    </script>
+
+</body>
+</html>
